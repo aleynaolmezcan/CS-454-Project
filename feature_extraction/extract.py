@@ -1,5 +1,4 @@
 import librosa as lr
-from librosa.feature.spectral import tonnetz
 import numpy as np
 
 genres = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
