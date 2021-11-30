@@ -61,8 +61,8 @@ with open('features_new.csv', "w+") as f:
             f.write(f',{np.mean(f_spectral_flatness)},{np.std(f_spectral_flatness)},{np.mean(f_spectral_contrast)},{np.std(f_spectral_contrast)}')
             f.write(f',{np.mean(f_tempogram)},{np.std(f_tempogram)},{np.mean(f_tempo)},{np.std(f_tempo)},{np.mean(f_rms)},{np.std(f_rms)},{np.mean(f_zero_crossing_rate)},{np.std(f_zero_crossing_rate)}')
             f.write(f',{np.mean(f_chroma_stft)},{np.std(f_chroma_stft)},{np.mean(f_chroma_cens)},{np.std(f_chroma_cens)},{np.mean(f_chroma_cqt)},{np.std(f_chroma_cqt)}')
-            f.write(f'{np.mean(f_tonnetz[0])},{np.std(f_tonnetz[0])},{np.mean(f_tonnetz[1])},{np.std(f_tonnetz[1])},{np.mean(f_tonnetz[2])},{np.std(f_tonnetz[2])},{np.mean(f_tonnetz[3])},{np.std(f_tonnetz[3])}')
-            f.write(f'{np.mean(f_tonnetz[4])},{np.std(f_tonnetz[4])},{np.mean(f_tonnetz[5])},{np.std(f_tonnetz[5])}')
+            f.write(f',{np.mean(f_tonnetz[0])},{np.std(f_tonnetz[0])},{np.mean(f_tonnetz[1])},{np.std(f_tonnetz[1])},{np.mean(f_tonnetz[2])},{np.std(f_tonnetz[2])},{np.mean(f_tonnetz[3])},{np.std(f_tonnetz[3])}')
+            f.write(f',{np.mean(f_tonnetz[4])},{np.std(f_tonnetz[4])},{np.mean(f_tonnetz[5])},{np.std(f_tonnetz[5])}')
             
 
             for i in f_mfccs:
