@@ -10,10 +10,13 @@ weights    = [0.5, 0.25, 0.25]
 distribution_samples = choices(population, weights, k=1000)
 
 with open('features.csv', 'r') as f:
-    f.readline()
+    l1 = f.readline()
     with open('training.csv', 'w+') as f_train:
         with open('testing.csv', 'w+') as f_test:
             with open('validation.csv', 'w+') as f_valid:
+                f_train.write(l1)
+                f_test.write(l1)
+                f_valid.write(l1)
                 for line in f:
                     if distribution_samples[0] == 0:
                         f_train.write(line)
