@@ -5,7 +5,6 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.decomposition import PCA
 from sklearn.neighbors import DistanceMetric
 
-
 def calculate_target(dataset):
     genres = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
     result_list = list()
