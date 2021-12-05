@@ -1,6 +1,9 @@
 import pandas as pd
+import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.decomposition import PCA
+from sklearn.neighbors import DistanceMetric
 
 
 def calculate_target(dataset):
@@ -35,11 +38,19 @@ y = calculate_target(y)  # Encoding the genres
 # print(len(y))
 # print(df.shape)
 
+pca = PCA(n_components=48)
+pca.fit(X)
+X = pca.transform(X)
+
 ''' Split dataset into train and test data '''
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1, stratify=y)
 
+
+
 ''' Create KNN classifier '''
-knn = KNeighborsClassifier(n_neighbors=3, algorithm='ball_tree')
+knn = KNeighborsClassifier(n_neighbors=15, metric='braycurtis', metric_params={'VI': np.cov(X_train)})
+
+
 
 ''' Fit the classifier to the data '''
 knn.fit(X_train, y_train)
