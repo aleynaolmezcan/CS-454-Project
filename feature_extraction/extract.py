@@ -4,7 +4,7 @@ import numpy as np
 genres = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
 
 beeg_features = []
-with open('features_new.csv', "w+") as f:
+with open('features_sr_fixed.csv', "w+") as f:
     f.write("song_name,mean_spectral_rolloff,std_spectral_rolloff,mean_spectral_centroid,std_spectral_centroid,mean_spectral_bandwidth,std_spectral_bandwidth"
     + ",mean_spectral_flatness,std_spectral_flatness,mean_spectral_contrast,std_spectral_contrast"
     + ",mean_tempogram,std_tempogram,mean_tempo,std_tempo,mean_rms,std_rms,mean_zero_crossing_rate,std_zero_crossing_rate"
@@ -21,7 +21,7 @@ with open('features_new.csv', "w+") as f:
         for i in range(100):
             wav_file = '../dataset/genres/' + genre + '/' + genre + '.' + f'{i:0>5}' + '.wav'
             path = './dataset/genres/' + genre + '/' + genre + '.' + f'{i:0>5}' + '.wav'
-            y, sr = lr.load(wav_file, sr=None)
+            y, sr = lr.load(wav_file)
 
             # Extract Magnitude Based (timbral) features from the audio files
             # i.e. spectral rolloff, flux, centroid, spread, decrease, slope, 
