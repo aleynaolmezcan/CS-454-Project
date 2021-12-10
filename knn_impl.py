@@ -34,7 +34,7 @@ if pca_components > 0:
     X = pca.transform(X)
 
 ''' Split dataset into train and test data '''
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=r_states, stratify=y)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=r_states, stratify=y)
 
 knn = KNeighborsClassifier(n_neighbors=num_neighbors, metric=used_metric)
 if used_metric == 'mahalanobis':
