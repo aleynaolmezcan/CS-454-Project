@@ -16,12 +16,15 @@ df = pd.read_csv("feature_extraction/features_last.csv")
 X = df.drop(columns=['song_name', 'label'])
 y = df['label'].values
 genres = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
-z = np.zeros(y.shape)
+z = []
 
-for i in y:
-     np.append(z, genres.index(i))
-y = z
+for i in range(1000):
+    z.append(genres.index(y[i]))
+     
+y = np.array(z)
 
+print(y)
+print(y.shape)
 df1 = pd.DataFrame({'label': y})
 X.join(df1)
 print(df1.head())
