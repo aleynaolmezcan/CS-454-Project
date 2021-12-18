@@ -1,6 +1,6 @@
 echo "Metrics,Num_Neighbors,PCA_Components,N_Random_States,Score" > log/logs2.csv
 
-metrics="mahalanobis euclidean minkowski manhattan chebyshev hamming"
+metrics="wminkowski mahalanobis euclidean minkowski manhattan chebyshev hamming"
 
 for metric in $metrics
 do

@@ -4,9 +4,8 @@ from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
-from umap import UMAP
 import umap
-
+from mpl_toolkits.mplot3d import Axes3D
 
 sns.set(style='white', context='notebook', rc={'figure.figsize':(14,10)})
 
@@ -23,24 +22,16 @@ for i in range(1000):
      
 y = np.array(z)
 
-print(y)
-print(y.shape)
+
 df1 = pd.DataFrame({'label': y})
-X.join(df1)
-print(df1.head())
+data = X.join(df1)
+print(data.head())
 
-reducer = umap.UMAP(random_state=42)
-reducer.fit(X,df1)
+reducer = umap.UMAP(metric='mahalanobis',
+     min_dist=0.01, n_components=3,
+     n_neighbors=15)
 
-UMAP(a=None, angular_rp_forest=False, b=None,
-     force_approximation_algorithm=False, init='spectral', learning_rate=1.0,
-     local_connectivity=1.0, low_memory=False, metric='mahalanobis',
-     metric_kwds=None, min_dist=0.1, n_components=2, n_epochs=None,
-     n_neighbors=15, negative_sample_rate=5, output_metric='mahalanobis',
-     output_metric_kwds=None, random_state=42, repulsion_strength=1.0,
-     set_op_mix_ratio=1.0, spread=1.0, target_metric='categorical',
-     target_metric_kwds=None, target_n_neighbors=-1, target_weight=0.5,
-     transform_queue_size=4.0, transform_seed=42, unique=False, verbose=False)
+reducer.fit(X, df1)
 
 embedding = reducer.transform(X)
 # Verify that the result of calling transform is
@@ -48,9 +39,9 @@ embedding = reducer.transform(X)
 assert(np.all(embedding == reducer.embedding_))
 print(embedding.shape)
 
-plt.scatter(embedding[:, 0], embedding[:, 1], c = df1.label, cmap='Spectral', s=5)
-plt.gca().set_aspect('equal', 'datalim')
-plt.colorbar(boundaries=np.arange(11)-0.5).set_ticks(np.arange(10))
-plt.title('UMAP projection of the Digits dataset', fontsize=24)
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(embedding[:, 0], embedding[:, 1], embedding[:, 2], c = df1.label, cmap= 'tab10')
+plt.title('UMAP projection of the GTZAN dataset', fontsize=24)
 
 plt.show()

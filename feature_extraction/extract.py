@@ -7,7 +7,7 @@ beeg_features = []
 with open('features_sr_fixed.csv', "w+") as f:
     f.write("song_name,mean_spectral_rolloff,std_spectral_rolloff,mean_spectral_centroid,std_spectral_centroid,mean_spectral_bandwidth,std_spectral_bandwidth"
     + ",mean_spectral_flatness,std_spectral_flatness,mean_spectral_contrast,std_spectral_contrast"
-    + ",mean_tempogram,std_tempogram,mean_tempo,std_tempo,mean_rms,std_rms,mean_zero_crossing_rate,std_zero_crossing_rate"
+    + ",mean_tempogram,std_tempogram,mean_tempo,mean_rms,std_rms,mean_zero_crossing_rate,std_zero_crossing_rate"
     + ",mean_chroma_stft,std_chroma_stft,mean_chroma_cens,std_chroma_cens,mean_chroma_cqt,std_chroma_cqt"
     + ",mean_fifth_x_axis,std_fifth_x_axis,mean_fifth_y_axis,std_fifth_y_axis,mean_minor_x_axis,std_minor_x_axis,mean_minor_y_axis,std_minor_y_axis"
     + ",mean_major_x_axis,std_major_x_axis,mean_major_y_axis,std_major_y_axis")
@@ -59,7 +59,7 @@ with open('features_sr_fixed.csv', "w+") as f:
 
             f.write(f'{path},{np.mean(f_spectral_rolloff)},{np.std(f_spectral_rolloff)},{np.mean(f_spectral_centroid)},{np.std(f_spectral_centroid)},{np.mean(f_spectral_bandwidth)},{np.std(f_spectral_bandwidth)}')
             f.write(f',{np.mean(f_spectral_flatness)},{np.std(f_spectral_flatness)},{np.mean(f_spectral_contrast)},{np.std(f_spectral_contrast)}')
-            f.write(f',{np.mean(f_tempogram)},{np.std(f_tempogram)},{np.mean(f_tempo)},{np.std(f_tempo)},{np.mean(f_rms)},{np.std(f_rms)},{np.mean(f_zero_crossing_rate)},{np.std(f_zero_crossing_rate)}')
+            f.write(f',{np.mean(f_tempogram)},{np.std(f_tempogram)},{np.mean(f_tempo)},{np.mean(f_rms)},{np.std(f_rms)},{np.mean(f_zero_crossing_rate)},{np.std(f_zero_crossing_rate)}')
             f.write(f',{np.mean(f_chroma_stft)},{np.std(f_chroma_stft)},{np.mean(f_chroma_cens)},{np.std(f_chroma_cens)},{np.mean(f_chroma_cqt)},{np.std(f_chroma_cqt)}')
             f.write(f',{np.mean(f_tonnetz[0])},{np.std(f_tonnetz[0])},{np.mean(f_tonnetz[1])},{np.std(f_tonnetz[1])},{np.mean(f_tonnetz[2])},{np.std(f_tonnetz[2])},{np.mean(f_tonnetz[3])},{np.std(f_tonnetz[3])}')
             f.write(f',{np.mean(f_tonnetz[4])},{np.std(f_tonnetz[4])},{np.mean(f_tonnetz[5])},{np.std(f_tonnetz[5])}')
