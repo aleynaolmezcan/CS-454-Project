@@ -1,5 +1,8 @@
 import librosa as lr
 import numpy as np
+#import pyAudioAnalysis as pya
+#from pyAudioAnalysis import MidTermFeatures as mtf
+from pyAudioAnalysis import ShortTermFeatures as stf
 
 genres = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
 
@@ -23,15 +26,17 @@ with open('features_sr_fixed.csv', "w+") as f:
             path = './dataset/genres/' + genre + '/' + genre + '.' + f'{i:0>5}' + '.wav'
             y, sr = lr.load(wav_file)
 
+            pyaudio_feats, pyaudio_feat_names = stf.feature_extraction(wav_file,sr,0.050,0.050)
+            
             # Extract Magnitude Based (timbral) features from the audio files
             # i.e. spectral rolloff, flux, centroid, spread, decrease, slope, 
             # flatness, and MFCCs
             f_spectral_rolloff    = lr.feature.spectral_rolloff(y=y, sr=sr)
-            #spectral_flux
+            #f_spectral_flux       = stf.spectral_flux(y=y, sr=sr)
             f_spectral_centroid   = lr.feature.spectral_centroid(y=y, sr=sr)
             f_spectral_bandwidth  = lr.feature.spectral_bandwidth(y=y, sr=sr)
-            #spectral_spread      = lr.feature.spectral_spread(x, sr=sr)
-            #spectral_decrease
+            #_,f_spectral_spread   = stf.spectral_centroid_spread(y=y, sr=sr)
+            #f_spectral_decrease   = stf.spectral_entropy(y=y, sr=sr)
             #spectral_slope
             f_spectral_flatness = lr.feature.spectral_flatness(y=y)
             f_spectral_contrast = lr.feature.spectral_contrast(y=y, sr=sr)

@@ -1,5 +1,7 @@
 from random import choices
 
+genres = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
+
 print('Dont use the script. Files are already separated.')
 with open('features_sr_fixed.csv', 'r+') as f:
     with open('features_last.csv', 'w+') as g:
@@ -8,7 +10,7 @@ with open('features_sr_fixed.csv', 'r+') as f:
             line = line.strip()
             song_name = line.split(',')[0]
             label = song_name.split('/')[-2]
-            line += "," + label + "\n"
+            line += "," + str(genres.index(label)) + "\n"
             g.write(line)
 
 
@@ -19,7 +21,7 @@ population = [0, 1]
 weights    = [0.75, 0.25]
 distribution_samples = choices(population, weights, k=1000)
 
-with open('features_sr_fixed.csv', 'r') as f:
+with open('features_last.csv', 'r') as f:
     l1 = f.readline()
     with open('training.csv', 'w+') as f_train:
         with open('validation.csv', 'w+') as f_valid:

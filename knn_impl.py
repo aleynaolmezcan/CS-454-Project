@@ -10,15 +10,6 @@ from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 
-def calculate_target(dataset):
-    genres = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
-    result_list = list()
-
-    for i in range(dataset.shape[0]):
-        result_list.append(genres.index(dataset[i].split('/')[-2]))
-
-    return result_list
-
 
 used_metric     = str(sys.argv[1])
 num_neighbors   = int(sys.argv[2])
@@ -32,8 +23,7 @@ scaler = StandardScaler()
 X = scaler.fit_transform(np.array(X.iloc[:, :-1], dtype = float))
 
 
-y = df['song_name'].values 
-y = calculate_target(y)
+y = df['label'].values 
 
 if pca_components > 0:
     pca = PCA(n_components=pca_components)
@@ -52,10 +42,11 @@ if used_metric == 'wminkowski':
 
 ''' Fit the classifier to the data '''
 knn.fit(X_train, y_train)
-c_mat = confusion_matrix(y_test, knn.predict(X_test))
+#c_mat = confusion_matrix(y_test, knn.predict(X_test))
 print(knn.score(X_test, y_test))
-disp = ConfusionMatrixDisplay(confusion_matrix=c_mat)
-disp.plot()
-plt.show()
+
+#disp = ConfusionMatrixDisplay(confusion_matrix=c_mat)
+#disp.plot()
+#plt.show()
 
 ''' Predict the response for test dataset '''
