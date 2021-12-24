@@ -3,6 +3,7 @@ import numpy as np
 #import pyAudioAnalysis as pya
 #from pyAudioAnalysis import MidTermFeatures as mtf
 from pyAudioAnalysis import ShortTermFeatures as stf
+from pyAudioAnalysis import audioBasicIO as aIO
 
 genres = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
 
@@ -18,6 +19,13 @@ with open('features_sr_fixed.csv', "w+") as f:
         f.write(",mean_mfcc_" + str(i))
         f.write(",std_mfcc_" + str(i))
 
+    dummy = '../dataset/genres/blues/blues.00000.wav'
+    [Fs, x]    = aIO.read_audio_file(dummy)
+    _, f_names = stf.feature_extraction(x, Fs, 0.050*Fs, 0.025*Fs, deltas=False)
+    
+    for i in range(len(f_names)):
+        f.write("," + f_names[i] + "_mean")
+        f.write("," + f_names[i] + "_std")
     f.write('\n')
 
     for genre in genres:
@@ -26,13 +34,17 @@ with open('features_sr_fixed.csv', "w+") as f:
             path = './dataset/genres/' + genre + '/' + genre + '.' + f'{i:0>5}' + '.wav'
             y, sr = lr.load(wav_file)
 
-            pyaudio_feats, pyaudio_feat_names = stf.feature_extraction(wav_file,sr,0.050,0.050)
+            [Fs, x]    = aIO.read_audio_file(wav_file)
+            F, f_names = stf.feature_extraction(x, Fs, 0.050*Fs, 0.025*Fs, deltas=False)
             
+            F = np.transpose(F)
+            G = np.mean(F, axis=0)
+            H = np.std(F, axis=0)
+
             # Extract Magnitude Based (timbral) features from the audio files
             # i.e. spectral rolloff, flux, centroid, spread, decrease, slope, 
             # flatness, and MFCCs
             f_spectral_rolloff    = lr.feature.spectral_rolloff(y=y, sr=sr)
-            #f_spectral_flux       = stf.spectral_flux(y=y, sr=sr)
             f_spectral_centroid   = lr.feature.spectral_centroid(y=y, sr=sr)
             f_spectral_bandwidth  = lr.feature.spectral_bandwidth(y=y, sr=sr)
             #_,f_spectral_spread   = stf.spectral_centroid_spread(y=y, sr=sr)
@@ -74,4 +86,8 @@ with open('features_sr_fixed.csv', "w+") as f:
                 f.write(',' + str(np.mean(i)))
                 f.write(',' + str(np.std(i)))
             
+            for i in range(len(f_names)):
+                f.write(',' + str(G[i]))
+                f.write(',' + str(H[i]))
+
             f.write('\n')

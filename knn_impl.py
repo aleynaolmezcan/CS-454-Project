@@ -9,6 +9,7 @@ from sklearn.neighbors import DistanceMetric
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import LabelEncoder, StandardScaler
+from scipy.spatial.distance import pdist, wminkowski, squareform
 
 
 used_metric     = str(sys.argv[1])
@@ -38,7 +39,8 @@ knn = KNeighborsClassifier(n_neighbors=num_neighbors, metric=used_metric)
 if used_metric == 'mahalanobis':
     knn = KNeighborsClassifier(n_neighbors=num_neighbors, metric=used_metric, metric_params={'VI': np.cov(X_train.T)})
 if used_metric == 'wminkowski':
-    knn = KNeighborsClassifier(n_neighbors=num_neighbors, metric=used_metric, metric_params={'w': np.random.uniform(0,1,X_train.shape[1])})
+    distances = pdist(X_train,wminkowski,p=2)
+    knn = KNeighborsClassifier(n_neighbors=num_neighbors, metric=used_metric, metric_params={'w': distances})
 
 ''' Fit the classifier to the data '''
 knn.fit(X_train, y_train)

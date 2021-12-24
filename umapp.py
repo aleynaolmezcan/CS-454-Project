@@ -14,20 +14,14 @@ df = pd.read_csv("feature_extraction/features_last.csv")
 
 X = df.drop(columns=['song_name', 'label'])
 y = df['label'].values
-genres = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
-z = []
 
-for i in range(1000):
-    z.append(genres.index(y[i]))
-     
-y = np.array(z)
 
 
 df1 = pd.DataFrame({'label': y})
 data = X.join(df1)
 print(data.head())
 
-reducer = umap.UMAP(metric='mahalanobis',
+reducer = umap.UMAP(metric='wminkowski',
      min_dist=0.01, n_components=3,
      n_neighbors=15)
 
