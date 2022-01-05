@@ -1,237 +1,145 @@
-import numpy as np
+# lets import libraries that we will be usings
+# we already have imported pandas and numpy
+import numpy as np # linear algebra
+import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+import matplotlib.pyplot as plt
+import scipy
+import librosa
+import librosa.display
+import IPython.display as ipd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
 import tensorflow as tf
-import keras
-from keras import backend as K
-from keras.models import Sequential, load_model
-from keras.layers import Dense, Dropout, Flatten
-from keras.layers import Conv2D, MaxPooling2D
-from keras.layers import BatchNormalization
-from keras.utils import np_utils
-from keras import regularizers
-from tensorflow.keras.layers import Layer, InputSpec
-from sklearn.metrics import precision_recall_fscore_support, confusion_matrix
-import matplotlib
-matplotlib.use("Agg")
-from matplotlib import pyplot as plt
-import itertools
+from tensorflow import keras
+import pickle # model pickling for future use
 
-###################################################################################################
+# Loading dataset
+# we have 2 CSVs here, one containing features for 30 sec audio file, mean & variance for diff features we have, then
+# and one for 3 sec audio files. I will be using 3 sec audio
+dataf = pd.read_csv('feature_extraction/features_last.csv')
+dataf.head()
 
-def plot_confusion_matrix(cm, classes,
-                          normalize=False,
-                          title='Confusion matrix',
-                          cmap=plt.cm.Blues):
-    """
-    This function prints and plots the confusion matrix.
-    Normalization can be applied by setting `normalize=True`.
-    """
-    if normalize:
-        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-        print("Normalized confusion matrix")
-    else:
-        print('Confusion matrix, without normalization')
+dataf.tail()
 
-    print(cm)
+dataf.shape
 
-    plt.imshow(cm, interpolation='nearest', cmap=cmap)
-    plt.title(title)
-    plt.colorbar()
-    tick_marks = np.arange(len(classes))
-    plt.xticks(tick_marks, classes, rotation=45)
-    plt.yticks(tick_marks, classes)
+dataf.describe()
 
-    fmt = '.1f' if normalize else 'd'
-    thresh = cm.max() / 2.
-    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-        plt.text(j, i, format(cm[i, j], fmt),
-                 horizontalalignment="center",
-                 color="white" if cm[i, j] > thresh else "black")
+# removing filename column
+dataf = dataf.drop(labels='song_name',axis=1)
 
-    plt.ylabel('True label')
-    plt.xlabel('Predicted label')
-    plt.tight_layout()
+# looking into what i have 
+sample_audio = "dataset/genres/pop/pop.00003.wav"
+sample, sample_rate = librosa.load(sample_audio)
 
 
-# Models to be passed to Music_Genre_CNN
+ipd.Audio(sample, rate=sample_rate)
 
-song_labels = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
+sample, sample_rate = librosa.load(sample_audio, sr=16000)
+print(len(sample),sample_rate)
 
-###################################################################################################
+print(type(sample),sample_rate)
+sample, sample_rate = librosa.load(sample_audio, sr=16000)
 
-def metric(y_true, y_pred):
-    return K.mean(K.equal(K.argmax(y_true, axis=1), K.argmax(y_pred, axis=1)))
+# plotting raw wave Files, here it is for Pop genre
+fig = plt.figure(figsize=(14,6))
+ax1 = fig.add_subplot(211)
+ax1.set_title("dataset/genres/pop/pop.00003.wav")
+ax1.set_xlabel('time')
+ax1.set_ylabel('Amptitude')
+librosa.display.waveplot(sample)
+plt.show()
 
-def cnn(num_genres=10, input_shape=(64,173,1)):
-    model = Sequential()
-    model.add(Conv2D(64, kernel_size=(4, 4),
-                     activation='relu', #kernel_regularizer=regularizers.l2(0.04),
-                     input_shape=input_shape))
-    model.add(BatchNormalization())
-    model.add(MaxPooling2D(pool_size=(2, 4)))
-    model.add(Conv2D(64, (3, 5), activation='relu'
-                    , kernel_regularizer=regularizers.l2(0.04)
-                    ))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.2))
-    model.add(Conv2D(64, (2, 2), activation='relu'
-       # , kernel_regularizer=regularizers.l2(0.04)
-        ))
-    model.add(BatchNormalization())
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.2))
-    model.add(Flatten())
-    model.add(Dense(64, activation='relu', kernel_regularizer=regularizers.l2(0.04)))
-    model.add(Dropout(0.5))
-    model.add(Dense(32, activation='relu', kernel_regularizer=regularizers.l2(0.04)))
-    model.add(Dense(num_genres, activation='softmax'))
-    model.compile(loss=keras.losses.categorical_crossentropy,
-                  optimizer=tf.keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0),
-                  metrics=[metric])
-    return(model)
+# Spectrogram, we have this in images folder
+# way of representing signal loudness at diff freq
+# also known as Sonographs
+# when data is 3D then waterfall
 
-###################################################################################################
-
-# Main network thingy to train
-
-class model(object):
-
-    def __init__(self, ann_model):
-        self.model = ann_model()
-
-    def train_model(self, train_x, train_y,
-                val_x=None, val_y=None,
-                small_batch_size=200, max_iteration=300, print_interval=1,
-                test_x=None, test_y=None):
-
-        m = len(train_x)
-
-        for it in range(max_iteration):
-
-            # split training data into even batches
-            batch_idx = np.random.permutation(m)
-            train_x = train_x[batch_idx]
-            train_y = train_y[batch_idx]
-
-            num_batches = int(m / small_batch_size)
-            for batch in range(num_batches):
-
-                x_batch = train_x[ batch*small_batch_size : (batch+1)*small_batch_size]
-                y_batch = train_y[ batch*small_batch_size : (batch+1)*small_batch_size]
-                print("starting batch\t", batch, "\t Epoch:\t", it)
-                self.model.train_on_batch(x_batch, y_batch)
-
-            if it % print_interval == 0:
-                validation_accuracy = self.model.evaluate(val_x, val_y)
-                training_accuracy = self.model.evaluate(train_x, train_y)
-                testing_accuracy = self.model.evaluate(test_x, test_y)
-                # print of test error used only after development of the model
-                print("\nTraining accuracy: %f\t Validation accuracy: %f\t Testing Accuracy: %f" %
-                      (training_accuracy[1], validation_accuracy[1], testing_accuracy[1]))
-                print("\nTraining loss: %f    \t Validation loss: %f    \t Testing Loss: %f \n" %
-                      (training_accuracy[0], validation_accuracy[0], testing_accuracy[0]))
-                print( )
-
-            if (validation_accuracy[1] > .81):
-                print("Saving confusion data...")
-                model_name = "model" + str(100*validation_accuracy[1]) + str(100*testing_accuracy[1]) + ".h5"
-                self.model.save(model_name)
-                pred = self.model.predict_classes(test_x, verbose=1)
-                cnf_matrix = confusion_matrix(np.argmax(test_y, axis=1), pred)
-                np.set_printoptions(precision=2)
-                plt.figure()
-                plot_confusion_matrix(cnf_matrix, classes=song_labels, normalize=True, title='Normalized confusion matrix')
-                print(precision_recall_fscore_support(np.argmax(test_y, axis=1),pred, average='macro'))
-                plt.savefig(str(batch))
-
-def loadall(filename=''):
-    tmp = np.load(filename)
-    x_tr = tmp['x_tr']
-    y_tr = tmp['y_tr']
-    x_te = tmp['x_te']
-    y_te = tmp['y_te']
-    x_cv = tmp['x_cv']
-    y_cv = tmp['y_cv']
-    return {'x_tr' : x_tr, 'y_tr' : y_tr,
-            'x_te' : x_te, 'y_te' : y_te,
-            'x_cv' : x_cv, 'y_cv' : y_cv, }
-
-###################################################################################################
-
-def main():
-
-##################################################################################################
-
-# Data stuff
+stft = librosa.stft(sample)
+stft_db = librosa.amplitude_to_db(abs(stft))
+plt.figure(figsize=(14,6))
+librosa.display.specshow(stft,sr=sample_rate,x_axis='time',y_axis='hz')
+plt.colorbar()
 
 
-    data = loadall('melspects.npz')
+stft = librosa.stft(sample)
+stft_db = librosa.amplitude_to_db(abs(stft))
+plt.figure(figsize=(14,6))
+librosa.display.specshow(stft_db,sr=sample_rate,x_axis='time',y_axis='hz')
+plt.colorbar()
 
-    x_tr = data['x_tr']
-    y_tr = data['y_tr']
-    x_te = data['x_te']
-    y_te = data['y_te']
-    x_cv = data['x_cv']
-    y_cv = data['y_cv']
+# Rolloff - feq below which a specified percentage of the total spectral lies / 85%
+from sklearn.preprocessing import normalize
 
-    tr_idx = np.random.permutation(len(x_tr))
-    te_idx = np.random.permutation(len(x_te))
-    cv_idx = np.random.permutation(len(x_cv))
+spectral_rolloff = librosa.feature.spectral_rolloff(sample+0.01,sr=sample_rate)[0]
+plt.figure(figsize=(14,6))
+librosa.display.waveplot(sample,sr=sample_rate,alpha=0.3)
 
-    x_tr = x_tr[tr_idx]
-    y_tr = y_tr[tr_idx]
-    x_te = x_te[te_idx]
-    y_te = y_te[te_idx]
-    x_cv = x_cv[cv_idx]
-    y_cv = y_cv[cv_idx]
+# Zero crossing 
+plt.figure(figsize=(14,6))
+plt.plot(sample[8000:12000])
+plt.grid()
 
-    x_tr = x_tr[:,:,:,np.newaxis]
-    x_te = x_te[:,:,:,np.newaxis]
-    x_cv = x_cv[:,:,:,np.newaxis]
+#count
+zero_cross = librosa.zero_crossings(sample[8000:12000],pad=False)
+print("Count {}".format(sum(zero_cross)))
 
-    y_tr = np_utils.to_categorical(y_tr)
-    y_te = np_utils.to_categorical(y_te)
-    y_cv = np_utils.to_categorical(y_cv)
+class_list = dataf.iloc[:,-1] 
+convert = LabelEncoder()
+
+y = convert.fit_transform(class_list)
+
+dataf.iloc[:,:-1]
+
+# scaling features
+from sklearn.preprocessing import StandardScaler
+fit = StandardScaler()
+X = fit.fit_transform(np.array(dataf.iloc[:,:-1],dtype=float))
+
+# dividing into training and test Data
+X_train,x_test, Y_train, y_test = train_test_split(X,y,test_size=0.2)
+
+print(len(Y_train),len(y_test))
+
+# Using CNN algorithm
+from keras.models import Sequential
+from keras.layers import Dense,Activation,Dropout
+from keras.callbacks import EarlyStopping, ModelCheckpoint
+
+# building model
+
+model = Sequential()
+
+model.add(Dense(512,input_shape=(X_train.shape[1],),activation='relu'))
+model.add(Dropout(0.2))
+
+model.add(Dense(256,activation='relu'))
+model.add(Dropout(0.2))
+
+model.add(Dense(128,activation='relu'))
+model.add(Dropout(0.2))
+
+model.add(Dense(64,activation='relu'))
+model.add(Dropout(0.2))
+
+model.add(Dense(10,activation='softmax'))
 
 
-# training = np.load('gtzan/gtzan_tr.npy')
-# x_tr = np.delete(training, -1, 1)
-# label_tr = training[:,-1]
+model.summary()
 
-# test = np.load('gtzan/gtzan_te.npy')
-# x_te = np.delete(test, -1, 1)
-# label_te = test[:,-1]
+model.compile(loss='sparse_categorical_crossentropy',optimizer='adam',metrics='accuracy')
 
-# cv = np.load('gtzan/gtzan_cv.npy')
-# x_cv = np.delete(cv, -1, 1)
-# label_cv = test[:,-1]
+earlystop = EarlyStopping(monitor='val_loss',mode='min',verbose=1,patience=10,min_delta=0.0001)
+modelcheck = ModelCheckpoint('best_model.hdf5',monitor='val_accuracy',verbose=1,save_best_only=True,mode='max')
 
-# temp = np.zeros((len(label_tr),10))
-# temp[np.arange(len(label_tr)),label_tr.astype(int)] = 1
-# y_tr = temp
-# temp = np.zeros((len(label_te),10))
-# temp[np.arange(len(label_te)),label_te.astype(int)] = 1
-# y_te = temp
-# temp = np.zeros((len(label_cv),10))
-# temp[np.arange(len(label_cv)),label_cv.astype(int)] = 1
-# y_cv = temp
-# del temp
+history = model.fit(X_train,Y_train, validation_data=(x_test,y_test), epochs=600, callbacks=[earlystop,modelcheck], batch_size=128)
 
-#################################################
+from matplotlib import pyplot 
+pyplot.plot(history.history['loss'], label='train') 
+pyplot.plot(history.history['val_loss'], label='test') 
+pyplot.legend()
+pyplot.show()
 
-#    if True:
-#   model = keras.models.load_model('model84.082.0.h5', custom_objects={'metric': metric})
-#   print("Saving confusion data...")
-#   pred = model.predict_classes(x_te, verbose=1)
-#   cnf_matrix = confusion_matrix(np.argmax(y_te, axis=1), pred)
-#   np.set_printoptions(precision=1)
-#   plt.figure()
-#   plot_confusion_matrix(cnf_matrix, classes=song_labels, normalize=True, title='Normalized confusion matrix')
-#   print(precision_recall_fscore_support(np.argmax(y_te, axis=1),pred, average='macro'))
-#   plt.savefig("matrix",format='png', dpi=1000)
-#   raise SystemExit
-
-    ann = model(cnn)
-    ann.train_model(x_tr, y_tr, val_x=x_cv, val_y=y_cv, test_x=x_te, test_y=y_te)
-
-if __name__ == '__main__':
-    main()
+test_loss, test_accuracy = model.evaluate(x_test,y_test,batch_size=128)
+print("Test loss : ",test_loss)
+print("\nBest test accuracy : ",test_accuracy*100)
