@@ -8,20 +8,13 @@ genres = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', '
 
 N_FFT = 512
 HOP_LENGTH = N_FFT // 2
-N_MELS = 64
+N_MELS = 128
 
 def log_melspectrogram(data, log=True, plot=False, num='', genre=""):
 
-    melspec = lb.feature.melspectrogram(y=data, hop_length = HOP_LENGTH, n_fft = N_FFT, n_mels = N_MELS, dtype=np.float32)
-
-    if log:
-        melspec = lb.power_to_db(melspec**2)
-
-    if plot:
-        melspec = melspec[np.newaxis, :]
-        plt.imshow(melspec.reshape((melspec.shape[1],melspec.shape[2])))
-        plt.savefig('./mel_pics/melspec'+str(num)+'_'+str(genre)+'.png')
-
+    melspec = lb.feature.melspectrogram(y=data, n_mels = N_MELS, fmax = 8000)
+    melspec = lb.power_to_db(melspec**2)
+    
     return melspec
 
 def batch_log_melspectrogram(data_list, log=True, plot=False):
@@ -40,12 +33,11 @@ with open('features_mels.csv', "w+") as f:
         for i in range(100):
             
             wav_file = '../dataset/genres/' + genre + '/' + genre + '.' + f'{i:0>5}' + '.wav'
-            y, sr = lb.load(wav_file, sr=22050, offset=5.0, duration=2.5, mono=True)
+            y, sr = lb.load(wav_file, sr=22050, duration=10, mono=True)
             
 
-            melspec    = log_melspectrogram(y, log=True, plot=True, num=i, genre=genre)
+            melspec    = log_melspectrogram(y, log=True, plot=False, num=i, genre=genre)
 
-            print(melspec.shape)
             f.write(f'{index},')
             melspec = melspec.flatten()
             melspec = melspec.reshape(1,melspec.shape[0])
