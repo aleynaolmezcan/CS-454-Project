@@ -15,15 +15,12 @@ from tensorflow import keras
 import pickle # model pickling for future use
 
 epohcs   = int(sys.argv[1])
-batch_size     = str(sys.argv[2])
-
-
+batch_size     = int(sys.argv[2])
 
 # Loading dataset
 # we have 2 CSVs here, one containing features for 30 sec audio file, mean & variance for diff features we have, then
 # and one for 3 sec audio files. I will be using 3 sec audio
 dataf = pd.read_csv('feature_extraction/features_lr_only.csv', skiprows=1, header=None)
-
 
 y = dataf.iloc[:,0] 
 
@@ -34,7 +31,6 @@ X = fit.fit_transform(np.array(dataf.iloc[:,1:],dtype=float))
 
 # dividing into training and test Data
 X_train,x_test, Y_train, y_test = train_test_split(X,y,test_size=0.2,shuffle=True)
-
 
 
 # Using CNN algorithm
@@ -60,20 +56,18 @@ model.add(Dropout(0.2))
 
 model.add(Dense(10,activation='softmax'))
 
-model.summary()
-
 model.compile(loss='sparse_categorical_crossentropy',optimizer='adam',metrics='accuracy')
 
 earlystop = EarlyStopping(monitor='val_loss',mode='min',verbose=1,patience=10,min_delta=0.0001)
 modelcheck = ModelCheckpoint('best_model.hdf5',monitor='val_accuracy',verbose=1,save_best_only=True,mode='max')
 
-history = model.fit(X_train,Y_train, validation_data=(x_test,y_test), epochs=epohcs, batch_size=batch_size)
+model.fit(X_train,Y_train, validation_data=(x_test,y_test), epochs=epohcs, batch_size=batch_size,verbose = 0)
 
-from matplotlib import pyplot 
-pyplot.plot(history.history['loss'], label='train') 
-pyplot.plot(history.history['val_loss'], label='test') 
-pyplot.legend()
-pyplot.show()
+# from matplotlib import pyplot 
+# pyplot.plot(history.history['loss'], label='train') 
+# pyplot.plot(history.history['val_loss'], label='test') 
+# pyplot.legend()
+# pyplot.show()
 
 test_loss, test_accuracy = model.evaluate(x_test,y_test,batch_size=batch_size)
 print("Test loss : ",test_loss)
