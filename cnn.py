@@ -8,7 +8,7 @@ import scipy
 import librosa
 import librosa.display
 import IPython.display as ipd
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.preprocessing import LabelEncoder
 import tensorflow as tf
 from tensorflow import keras
@@ -40,7 +40,32 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint
 
 # building model
 
-model = Sequential()
+model_ = Sequential()
+
+
+# change the values of hyperparameters to find the optimal set with GridSearch
+param_grid = {
+              'batch_size':[128],
+              'epochs' :              [100,150,200],
+              #'batch_size' :          [32, 128],
+              #'optimizer' :           ['Adam', 'Nadam'],
+              #'dropout_rate' :        [0.2, 0.3],
+              #'activation' :          ['relu', 'elu']
+             }
+
+# model.fit(X_valid, y_valid, groups=None)
+model = GridSearchCV(
+        estimator=model_,
+        param_grid=param_grid, 
+        cv=3, 
+        n_jobs=-1, 
+        scoring=scoring_fit,
+        verbose=2
+    )
+
+
+
+
 
 model.add(Dense(512,input_shape=(X_train.shape[1],),activation='relu'))
 model.add(Dropout(0.2))
@@ -61,7 +86,8 @@ model.compile(loss='sparse_categorical_crossentropy',optimizer='adam',metrics='a
 earlystop = EarlyStopping(monitor='val_loss',mode='min',verbose=1,patience=10,min_delta=0.0001)
 modelcheck = ModelCheckpoint('best_model.hdf5',monitor='val_accuracy',verbose=1,save_best_only=True,mode='max')
 
-model.fit(X_train,Y_train, validation_data=(x_test,y_test), epochs=epohcs, batch_size=batch_size,verbose = 0)
+model.fit(X_train,Y_train)
+#model.fit(X_train,Y_train, validation_data=(x_test,y_test), epochs=epohcs, batch_size=batch_size,verbose = 0)
 
 # from matplotlib import pyplot 
 # pyplot.plot(history.history['loss'], label='train') 
