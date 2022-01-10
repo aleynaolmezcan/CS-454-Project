@@ -18,7 +18,7 @@ pca_components  = int(sys.argv[3])
 r_states        = int(sys.argv[4])
 
 
-df = pd.read_csv('feature_extraction/training.csv')
+df = pd.read_csv('feature_extraction/features_last.csv')
 X = df.drop(columns=['song_name'])  # Keeps all the features of the songs
 scaler = StandardScaler()
 X = scaler.fit_transform(np.array(X.iloc[:, :-1], dtype = float))
@@ -39,7 +39,7 @@ knn = KNeighborsClassifier(n_neighbors=num_neighbors, metric=used_metric)
 if used_metric == 'mahalanobis':
     knn = KNeighborsClassifier(n_neighbors=num_neighbors, metric=used_metric, metric_params={'VI': np.cov(X_train.T)})
 if used_metric == 'wminkowski':
-    distances = pdist(X_train,wminkowski,p=2)
+    distances = np.random.uniform(0, 1, X_train.shape[0])
     knn = KNeighborsClassifier(n_neighbors=num_neighbors, metric=used_metric, metric_params={'w': distances})
 
 ''' Fit the classifier to the data '''

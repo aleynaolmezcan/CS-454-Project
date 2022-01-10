@@ -19,27 +19,28 @@ with open('features_sr_fixed.csv', "w+") as f:
         f.write(",mean_mfcc_" + str(i))
         f.write(",std_mfcc_" + str(i))
 
-    dummy = '../dataset/genres/blues/blues.00000.wav'
-    [Fs, x]    = aIO.read_audio_file(dummy)
-    _, f_names = stf.feature_extraction(x, Fs, 0.050*Fs, 0.025*Fs, deltas=False)
+    # dummy = '../dataset/genres/blues/blues.00000.wav'
+    # [Fs, x]    = aIO.read_audio_file(dummy)
+    # _, f_names = stf.feature_extraction(x, Fs, 0.050*Fs, 0.025*Fs, deltas=False)
     
-    for i in range(len(f_names)):
-        f.write("," + f_names[i] + "_mean")
-        f.write("," + f_names[i] + "_std")
+    # for i in range(len(f_names)):
+    #     f.write("," + f_names[i] + "_mean")
+    #     f.write("," + f_names[i] + "_std")
     f.write('\n')
 
     for genre in genres:
+        index = genres.index(genre)
         for i in range(100):
             wav_file = '../dataset/genres/' + genre + '/' + genre + '.' + f'{i:0>5}' + '.wav'
             path = './dataset/genres/' + genre + '/' + genre + '.' + f'{i:0>5}' + '.wav'
             y, sr = lr.load(wav_file)
 
-            [Fs, x]    = aIO.read_audio_file(wav_file)
-            F, f_names = stf.feature_extraction(x, Fs, 0.050*Fs, 0.025*Fs, deltas=False)
+            # [Fs, x]    = aIO.read_audio_file(wav_file)
+            # F, f_names = stf.feature_extraction(x, Fs, 0.050*Fs, 0.025*Fs, deltas=False)
             
-            F = np.transpose(F)
-            G = np.mean(F, axis=0)
-            H = np.std(F, axis=0)
+            # F = np.transpose(F)
+            # G = np.mean(F, axis=0)
+            # H = np.std(F, axis=0)
 
             # Extract Magnitude Based (timbral) features from the audio files
             # i.e. spectral rolloff, flux, centroid, spread, decrease, slope, 
@@ -74,7 +75,7 @@ with open('features_sr_fixed.csv', "w+") as f:
             f_tonnetz      = lr.feature.tonnetz(y=y, sr=sr)
 
 
-            f.write(f'{path},{np.mean(f_spectral_rolloff)},{np.std(f_spectral_rolloff)},{np.mean(f_spectral_centroid)},{np.std(f_spectral_centroid)},{np.mean(f_spectral_bandwidth)},{np.std(f_spectral_bandwidth)}')
+            f.write(f'{index},{np.mean(f_spectral_rolloff)},{np.std(f_spectral_rolloff)},{np.mean(f_spectral_centroid)},{np.std(f_spectral_centroid)},{np.mean(f_spectral_bandwidth)},{np.std(f_spectral_bandwidth)}')
             f.write(f',{np.mean(f_spectral_flatness)},{np.std(f_spectral_flatness)},{np.mean(f_spectral_contrast)},{np.std(f_spectral_contrast)}')
             f.write(f',{np.mean(f_tempogram)},{np.std(f_tempogram)},{np.mean(f_tempo)},{np.mean(f_rms)},{np.std(f_rms)},{np.mean(f_zero_crossing_rate)},{np.std(f_zero_crossing_rate)}')
             f.write(f',{np.mean(f_chroma_stft)},{np.std(f_chroma_stft)},{np.mean(f_chroma_cens)},{np.std(f_chroma_cens)},{np.mean(f_chroma_cqt)},{np.std(f_chroma_cqt)}')
@@ -86,8 +87,8 @@ with open('features_sr_fixed.csv', "w+") as f:
                 f.write(',' + str(np.mean(i)))
                 f.write(',' + str(np.std(i)))
             
-            for i in range(len(f_names)):
-                f.write(',' + str(G[i]))
-                f.write(',' + str(H[i]))
+            # for i in range(len(f_names)):
+            #     f.write(',' + str(G[i]))
+            #     f.write(',' + str(H[i]))
 
             f.write('\n')
