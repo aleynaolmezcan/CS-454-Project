@@ -19,7 +19,7 @@ used_metric     = str(sys.argv[1])
 num_neighbors   = int(sys.argv[2])
 pca_components  = int(sys.argv[3])
 r_state         = int(sys.argv[4])
-
+genres = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
 df = pd.read_csv('feature_extraction/features_last.csv')
 X = df.drop(columns=['song_name'])  # Keeps all the features of the songs
 scaler = MinMaxScaler()
@@ -35,7 +35,7 @@ if pca_components > 0:
 
 ''' Split dataset into train and test data '''
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y)
-X_val, X_test, y_val, y_test = train_test_split(X_test, y_test, test_size=0.5, stratify=y_test)
+#X_val, X_test, y_val, y_test = train_test_split(X_test, y_test, test_size=0.5, stratify=y_test)
 
 knn = KNeighborsClassifier(metric=used_metric, n_neighbors=num_neighbors)
 
@@ -65,11 +65,20 @@ print("Recall Score: ", recall_score(y_test, test_pred, average = 'weighted'))
 
 conf_matrix = confusion_matrix(y_test, test_pred)
 
-df_cm = pd.DataFrame(conf_matrix, index = [i for i in range(10)],
-                columns = [i for i in range(10)])
+df_cm = pd.DataFrame(conf_matrix, index =['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock'],
+                columns = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock'])
 
-plt.title('Confusion Matrix KNN - Test Data')
-sn.heatmap(df_cm, annot=True, cmap="YlGnBu")
+
+sn.set(rc={'figure.figsize':(11.7,8.27)})
+plt.title('Confusion Matrix KNN - Test Data\n k = ' + str(num_neighbors) + ' - PCA = ' + str(pca_components) + ' - ' + used_metric.upper())
+ax = sn.heatmap(df_cm, annot=True, cmap="YlGnBu")
+ax.tick_params(axis='x', rotation=30)
 plt.savefig('./confusion_matrix_knn_test.png')
 #plt.show()
 plt.clf()
+
+
+# burcu 15
+# esad 10
+# emin 25
+# aleyna 20
