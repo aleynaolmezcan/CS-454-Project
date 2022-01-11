@@ -15,8 +15,6 @@ with open('features_lr_only.csv', "w+") as f:
     for i in range(20):
         f.write(",mean_mfcc_" + str(i))
         f.write(",std_mfcc_" + str(i))
-
-    dummy = '../dataset/genres/blues/blues.00000.wav'
     
     f.write('\n')
 
