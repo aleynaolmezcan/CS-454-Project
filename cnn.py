@@ -1,3 +1,5 @@
+# inspired from https://github.com/Shashabl0/Music-Genre-Classification-using-CNN/blob/master/music-genre-classification.ipynb
+
 # lets import libraries that we will be usings
 # we already have imported pandas and numpy
 import sys
