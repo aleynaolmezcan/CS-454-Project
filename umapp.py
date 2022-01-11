@@ -6,24 +6,27 @@ import seaborn as sns
 import pandas as pd
 import umap
 from mpl_toolkits.mplot3d import Axes3D
+from sklearn.preprocessing import LabelEncoder, StandardScaler, MinMaxScaler
 
 sns.set(style='white', context='notebook', rc={'figure.figsize':(14,10)})
 
-df = pd.read_csv("feature_extraction/features_last.csv")
-#print(df.head())
+df = pd.read_csv("feature_extraction/features_lr_only.csv")
 
-X = df.drop(columns=['song_name', 'label'])
-y = df['label'].values
+X = df.drop(columns=['song_name'])
+y = df['song_name'].values
+#print(X.head())
 
 
+scaler = MinMaxScaler()
+X = scaler.fit_transform(np.array(X, dtype = float))
+X = pd.DataFrame(X)
 
 df1 = pd.DataFrame({'label': y})
 data = X.join(df1)
-print(data.head())
+#print(data.head())
 
-reducer = umap.UMAP(metric='wminkowski',
-     min_dist=0.01, n_components=3,
-     n_neighbors=15)
+reducer = umap.UMAP(metric='mahalanobis',
+     min_dist=0.01, n_components=3)
 
 reducer.fit(X, df1)
 
@@ -36,6 +39,6 @@ print(embedding.shape)
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 ax.scatter(embedding[:, 0], embedding[:, 1], embedding[:, 2], c = df1.label, cmap= 'tab10')
-plt.title('UMAP projection of the GTZAN dataset', fontsize=24)
+plt.title('UMAP projection of the GTZAN dataset\n Mahalanobis Distance', fontsize=24)
 
 plt.show()
