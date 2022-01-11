@@ -37,18 +37,12 @@ if pca_components > 0:
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y)
 X_val, X_test, y_val, y_test = train_test_split(X_test, y_test, test_size=0.5, stratify=y_test)
 
-#param_grid = {'used_metric' : ['mahalanobis', 'euclidean', 'minkowski', 'manhattan', 'chebyshev', 'hamming'], 'weights' : ['uniform', 'distance'],'n_neighbors': [0,1, 2, 3, 4, 5, 6, 7, 8, 9, 10] }
-
-
 knn = KNeighborsClassifier(metric=used_metric, n_neighbors=num_neighbors)
-# model = GridSearchCV(knn, param_grid, cv=3)
-
-# model.fit(X_train,y_train,groups=None)
-
-
 
 if used_metric == 'mahalanobis':
     knn = KNeighborsClassifier(n_neighbors=num_neighbors, metric=used_metric, metric_params={'VI': np.cov(X_train.T)})
+
+# this is only used for testing not reporting
 if used_metric == 'wminkowski':
     distances = np.random.uniform(0, 1, X_train.shape[0])
     knn = KNeighborsClassifier(n_neighbors=num_neighbors, metric=used_metric, metric_params={'w': distances})
@@ -62,11 +56,6 @@ knn.fit(X_train, y_train)
 
 test_pred = knn.predict(X_test)
 
-
-#disp = ConfusionMatrixDisplay(confusion_matrix=c_mat)
-#disp.plot()
-#plt.show()
-
 print("Accuracy : ", accuracy_score(y_test, test_pred))
 print("Balanced Accuracy : ", balanced_accuracy_score(y_test, test_pred))
 print("Matthews Correlation Coefficient: ", matthews_corrcoef(y_test, test_pred))
@@ -75,7 +64,6 @@ print("Precision Score: ", precision_score(y_test, test_pred, average = 'weighte
 print("Recall Score: ", recall_score(y_test, test_pred, average = 'weighted'))
 
 conf_matrix = confusion_matrix(y_test, test_pred)
-#print('\033[1m' + "\n Table 1: Confusion Matrix of Test Data \n\n" + '\033[0m', conf_matrix)
 
 df_cm = pd.DataFrame(conf_matrix, index = [i for i in range(10)],
                 columns = [i for i in range(10)])
