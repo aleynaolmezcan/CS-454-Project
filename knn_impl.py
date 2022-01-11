@@ -12,7 +12,8 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import LabelEncoder, StandardScaler, MinMaxScaler
 from scipy.spatial.distance import pdist, wminkowski, squareform
 from sklearn.model_selection import GridSearchCV   
-
+from sklearn.metrics import accuracy_score, balanced_accuracy_score, matthews_corrcoef, confusion_matrix, classification_report, make_scorer, f1_score, precision_score, recall_score
+import seaborn as sn
 
 used_metric     = str(sys.argv[1])
 num_neighbors   = int(sys.argv[2])
@@ -33,8 +34,8 @@ if pca_components > 0:
     X = pca.transform(X)
 
 ''' Split dataset into train and test data '''
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=r_state)
-X_val, X_test, y_val, y_test = train_test_split(X_test, y_test, test_size=0.5, stratify=y_test, random_state=r_state)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y)
+X_val, X_test, y_val, y_test = train_test_split(X_test, y_test, test_size=0.5, stratify=y_test)
 
 #param_grid = {'used_metric' : ['mahalanobis', 'euclidean', 'minkowski', 'manhattan', 'chebyshev', 'hamming'], 'weights' : ['uniform', 'distance'],'n_neighbors': [0,1, 2, 3, 4, 5, 6, 7, 8, 9, 10] }
 
@@ -56,11 +57,31 @@ if used_metric == 'wminkowski':
 knn.fit(X_train, y_train)
 #c_mat = confusion_matrix(y_test, knn.predict(X_test))
 # print(knn.score(X_val, y_val))
-print(knn.score(X_val, y_val))
+# print(knn.score(X_test, y_test))
+
+
+test_pred = knn.predict(X_test)
 
 
 #disp = ConfusionMatrixDisplay(confusion_matrix=c_mat)
 #disp.plot()
 #plt.show()
 
-''' Predict the response for test dataset '''
+print("Accuracy : ", accuracy_score(y_test, test_pred))
+print("Balanced Accuracy : ", balanced_accuracy_score(y_test, test_pred))
+print("Matthews Correlation Coefficient: ", matthews_corrcoef(y_test, test_pred))
+print("F1 Score: ", f1_score(y_test, test_pred, average = 'weighted'))
+print("Precision Score: ", precision_score(y_test, test_pred, average = 'weighted'))
+print("Recall Score: ", recall_score(y_test, test_pred, average = 'weighted'))
+
+conf_matrix = confusion_matrix(y_test, test_pred)
+#print('\033[1m' + "\n Table 1: Confusion Matrix of Test Data \n\n" + '\033[0m', conf_matrix)
+
+df_cm = pd.DataFrame(conf_matrix, index = [i for i in range(10)],
+                columns = [i for i in range(10)])
+
+plt.title('Confusion Matrix KNN - Test Data')
+sn.heatmap(df_cm, annot=True, cmap="YlGnBu")
+plt.savefig('./confusion_matrix_knn_test.png')
+#plt.show()
+plt.clf()
